@@ -106,11 +106,22 @@ public class MainActivity extends AppCompatActivity {
                 if(msg.what == MESSAGE_READ){
                     String readMessage = null;
                     try {
-                        readMessage = new String((byte[]) msg.obj, "UTF-8");
+                        readMessage = new String((byte[]) msg.obj, "ASCII");
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                    refreshInformation(readMessage);
+                    int previousIndex = 0;
+                    for (int index = readMessage.indexOf(0xA);
+                         index >= 0;
+                         index = readMessage.indexOf(0xA, index + 1)){
+                        String message = readMessage.substring(previousIndex, index);
+                        if(message.length() > 2){
+                            refreshInformation(message);
+                        }
+
+                        previousIndex = index -1;
+                    }
+
                     mReadBuffer.setText(readMessage);
                     Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_SHORT).show();;
                 }
@@ -135,17 +146,21 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v){
                     if(mConnectedThread != null) { //First check to make sure thread created
-                        if(mCalibrationOne.getText().toString().length() == 0){
-                            mConnectedThread.write(00 + mCalibrationOne.getText().toString());
+                        if(mCalibrationOne.getText().toString().length() != 0){
+                            String tmp = "10" + mCalibrationOne.getText().toString();
+                            mConnectedThread.write(tmp);
                         }
-                        if(mCalibrationOne.getText().toString().length() == 0){
-                            mConnectedThread.write(01 + mCalibrationTwo.getText().toString());
+                        if(mCalibrationTwo.getText().toString().length() != 0){
+                            String tmp = "11" + mCalibrationTwo.getText().toString();
+                            mConnectedThread.write(tmp);
                         }
-                        if(mCalibrationOne.getText().toString().length() == 0){
-                            mConnectedThread.write(03 + mHFConfigK.getText().toString());
+                        if(mHFConfigK.getText().toString().length() != 0){
+                            String tmp = "13" + mHFConfigK.getText().toString();
+                            mConnectedThread.write(tmp);
                         }
-                        if(mCalibrationOne.getText().toString().length() == 0){
-                            mConnectedThread.write(04 + mCurrentHFConfigUp.getText().toString());
+                        if(mHFConfigUp.getText().toString().length() != 0){
+                            String tmp = "14" + mHFConfigUp.getText().toString();
+                            mConnectedThread.write(tmp);
                         }
                     }
                 }
@@ -384,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
                         SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
                         bytes = mmInStream.available(); // how many bytes are ready to be read?
                         bytes = mmInStream.read(buffer, 0, bytes); // record how many bytes we actually read
-                        int lastMarker = 0;
+                        /*int lastMarker = 0;
                         int marker = 0;
                         for(int i=0; i< buffer.length; i++){
                             toSend[i - marker] = buffer[i];
@@ -399,7 +414,9 @@ public class MainActivity extends AppCompatActivity {
                                 lastMarker = marker;
                                 marker++;
                             }
-                        }
+                        }*/
+                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+                                .sendToTarget(); // Send the obtained bytes to the UI activity
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
