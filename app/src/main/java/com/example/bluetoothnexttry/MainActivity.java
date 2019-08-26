@@ -8,10 +8,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +23,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
 
+    private String header;
+
+    private File filepath;
+
 
     // #defines for identifying shared types between calling functions
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
@@ -100,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
         mDevicesListView = (ListView)findViewById(R.id.devicesListView);
         mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
         mDevicesListView.setOnItemClickListener(mDeviceClickListener);
+
+        createLogFile();
 
         mHandler = new Handler(){
             public void handleMessage(android.os.Message msg){
@@ -245,12 +256,42 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_ENABLE_BT) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                // The user picked a contact.
-                // The Intent's data Uri identifies which contact was selected.
                 mBluetoothStatus.setText("Enabled");
             }
             else
                 mBluetoothStatus.setText("Disabled");
+        }
+    }
+
+    public void writeToFile(String mySituation, String myMessage)
+    {
+        if(!filepath.exists()){
+            createLogFile();
+        }
+        try {
+            FileWriter writer = new FileWriter(filepath);
+            writer.append(mySituation + "\t" + myMessage + "\t" + DateFormat.format("ss-mm-kk-dd-MM-yyyy",System.currentTimeMillis()).toString());
+            writer.flush();
+            writer.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void createLogFile()
+    {
+        try {
+            header = DateFormat.format("MM-dd-yyyyy-h-mmssaa", System.currentTimeMillis()).toString();
+            File root = new File(Environment.getExternalStorageDirectory(), "EierLogs");
+            if (!root.exists()) {
+                root.mkdirs();
+            }
+            filepath = new File(root, header + ".txt");
+        }
+        catch (Exception e)  {
+            e.printStackTrace();
+
         }
     }
 
@@ -449,17 +490,21 @@ public class MainActivity extends AppCompatActivity {
         {
             case "0":
                 mCurrentCOne.setText(message.substring(1));
+                writeToFile("Config 1: ", message.substring(1));
                 break;
             case "1":
                 mCurrentCTwo.setText(message.substring(1));
+                writeToFile("Config 2: ", message.substring(1));
                 break;
             case "2":
                 break;
             case "3":
                 mCurrentHFConfigK.setText(message.substring(1));
+                writeToFile("HF Config K: : ", message.substring(1));
                 break;
             case "4":
                 mCurrentHFConfigUp.setText(message.substring(1));
+                writeToFile("HF Config Up: ", message.substring(1));
                 break;
             case "5":
                 break;
