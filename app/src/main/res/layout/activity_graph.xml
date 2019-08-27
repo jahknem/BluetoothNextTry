@@ -5,9 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".GraphActivity">
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="661dp">
+
+        </com.github.mikephil.charting.charts.LineChart>
+
+        <Button
+            android:id="@+id/refreshChartButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="refreshChart"
+            android:text="Refresh Chart" />
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

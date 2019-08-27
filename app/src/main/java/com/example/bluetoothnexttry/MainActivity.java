@@ -68,8 +68,14 @@ public class MainActivity extends AppCompatActivity {
 
     private String header;
 
-    private File filepath;
 
+    public class pubStructs {
+        public File filepath;
+        public File getFilepath(){
+            return filepath;
+        }
+    }
+    public pubStructs pB;
 
     // #defines for identifying shared types between calling functions
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
@@ -100,8 +106,6 @@ public class MainActivity extends AppCompatActivity {
         mCalibrationTwo = (EditText)findViewById(R.id.calibrationTwo);
         mHFConfigK = (EditText)findViewById(R.id.hfConfigK);
         mHFConfigUp = (EditText)findViewById(R.id.hfConfigUp);
-
-
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
@@ -265,11 +269,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void writeToFile(String mySituation, String myMessage)
     {
-        if(!filepath.exists()){
+        if(!pB.filepath.exists()){
             createLogFile();
         }
         try {
-            FileWriter writer = new FileWriter(filepath);
+            FileWriter writer = new FileWriter(pB.filepath);
             writer.append(mySituation + "\t" + myMessage + "\t" + DateFormat.format("ss-mm-kk-dd-MM-yyyy",System.currentTimeMillis()).toString());
             writer.flush();
             writer.close();
@@ -287,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
             if (!root.exists()) {
                 root.mkdirs();
             }
-            filepath = new File(root, header + ".txt");
+            pB.filepath = new File(root, header + ".txt");
         }
         catch (Exception e)  {
             e.printStackTrace();
@@ -490,21 +494,21 @@ public class MainActivity extends AppCompatActivity {
         {
             case "0":
                 mCurrentCOne.setText(message.substring(1));
-                writeToFile("Config 1: ", message.substring(1));
+                writeToFile("Config 1:", message.substring(1));
                 break;
             case "1":
                 mCurrentCTwo.setText(message.substring(1));
-                writeToFile("Config 2: ", message.substring(1));
+                writeToFile("Config 2:", message.substring(1));
                 break;
             case "2":
                 break;
             case "3":
                 mCurrentHFConfigK.setText(message.substring(1));
-                writeToFile("HF Config K: : ", message.substring(1));
+                writeToFile("HF Config K:", message.substring(1));
                 break;
             case "4":
                 mCurrentHFConfigUp.setText(message.substring(1));
-                writeToFile("HF Config Up: ", message.substring(1));
+                writeToFile("HF Config Up:", message.substring(1));
                 break;
             case "5":
                 break;
